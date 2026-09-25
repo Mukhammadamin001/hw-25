@@ -1,0 +1,170 @@
+[
+  {
+    "id": 1,
+    "title": "Midnight Avenue",
+    "artist": "Leo Carter",
+    "category": "jazz",
+    "file": "music/jazz/1.mp3",
+    "duration": 148.68
+  },
+  {
+    "id": 2,
+    "title": "Blue Velvet Rain",
+    "artist": "Nora Hayes",
+    "category": "jazz",
+    "file": "music/jazz/2.mp3",
+    "duration": 140.21
+  },
+  {
+    "id": 3,
+    "title": "Smoke & Saxophone",
+    "artist": "The Quiet Trio",
+    "category": "jazz",
+    "file": "music/jazz/3.mp3",
+    "duration": 135.61
+  },
+  {
+    "id": 4,
+    "title": "Late Night Samarkand",
+    "artist": "Aziz Rahimov Quartet",
+    "category": "jazz",
+    "file": "music/jazz/4.mp3",
+    "duration": 144.76
+  },
+  {
+    "id": 5,
+    "title": "Autumn Coffee",
+    "artist": "Mila Stone",
+    "category": "jazz",
+    "file": "music/jazz/5.mp3",
+    "duration": 114.14
+  },
+  {
+    "id": 6,
+    "title": "Brass Reflections",
+    "artist": "Jonah Reed",
+    "category": "jazz",
+    "file": "music/jazz/6.mp3",
+    "duration": 152.81
+  },
+  {
+    "id": 7,
+    "title": "Morning Prelude",
+    "artist": "Elena Voss",
+    "category": "classic",
+    "file": "music/classic/1.mp3",
+    "duration": 120.36
+  },
+  {
+    "id": 8,
+    "title": "Serenade in G",
+    "artist": "Aurora String Quartet",
+    "category": "classic",
+    "file": "music/classic/2.mp3",
+    "duration": 125.45
+  },
+  {
+    "id": 9,
+    "title": "Nocturne of the Silent Lake",
+    "artist": "Adrian Morel",
+    "category": "classic",
+    "file": "music/classic/3.mp3",
+    "duration": 136.31
+  },
+  {
+    "id": 10,
+    "title": "Waltz of the Lanterns",
+    "artist": "Sofia Lindqvist",
+    "category": "classic",
+    "file": "music/classic/4.mp3",
+    "duration": 112.48
+  },
+  {
+    "id": 11,
+    "title": "Canon in Autumn",
+    "artist": "Aurora String Quartet",
+    "category": "classic",
+    "file": "music/classic/5.mp3",
+    "duration": 132.4
+  },
+  {
+    "id": 12,
+    "title": "Spring Dance (Allegro)",
+    "artist": "Camerata Nova",
+    "category": "classic",
+    "file": "music/classic/6.mp3",
+    "duration": 98.45
+  },
+  {
+    "id": 13,
+    "title": "Adagio for a Grey Morning",
+    "artist": "Camerata Nova",
+    "category": "classic",
+    "file": "music/classic/7.mp3",
+    "duration": 126.17
+  },
+  {
+    "id": 14,
+    "title": "Pastorale for Harp and Flute",
+    "artist": "Isabelle Fontaine & Lucas Meyer",
+    "category": "classic",
+    "file": "music/classic/8.mp3",
+    "duration": 112.45
+  },
+  {
+    "id": 15,
+    "title": "Crossroads at Dawn",
+    "artist": "Delta Joe Walker",
+    "category": "blues",
+    "file": "music/blues/1.mp3",
+    "duration": 128.2
+  },
+  {
+    "id": 16,
+    "title": "Whiskey Rain Shuffle",
+    "artist": "Johnny Ray Coleman",
+    "category": "blues",
+    "file": "music/blues/2.mp3",
+    "duration": 115.32
+  },
+  {
+    "id": 17,
+    "title": "Blue Monday Boogie",
+    "artist": "Eddie \"Keys\" Morgan",
+    "category": "blues",
+    "file": "music/blues/3.mp3",
+    "duration": 113.68
+  },
+  {
+    "id": 18,
+    "title": "Muddy Road Home",
+    "artist": "Sam Tucker",
+    "category": "blues",
+    "file": "music/blues/4.mp3",
+    "duration": 110.81
+  },
+  {
+    "id": 19,
+    "title": "Midnight Train Blues",
+    "artist": "Harmonica Slim & The Rail Riders",
+    "category": "blues",
+    "file": "music/blues/5.mp3",
+    "duration": 116.23
+  },
+  {
+    "id": 20,
+    "title": "Minor Mood Blues",
+    "artist": "Lena Brooks Trio",
+    "category": "blues",
+    "file": "music/blues/6.mp3",
+    "duration": 125.81
+  },
+  {
+    "id": 21,
+    "title": "Last Call at Joe's",
+    "artist": "Otis Grant",
+    "category": "blues",
+    "file": "music/blues/7.mp3",
+    "duration": 113.05
+  }
+]

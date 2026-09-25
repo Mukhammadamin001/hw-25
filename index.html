@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Музыкальный плеер: Jazz, Classic, Blues" />
+    <title>Музыкальный плеер</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script>
+      // Тему выставляем до отрисовки, чтобы не было «вспышки» светлого фона
+      (function () {
+        var theme = null;
+        try { theme = JSON.parse(localStorage.getItem('player:theme')); } catch (e) {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" aria-label="Категории">
+        <header class="sidebar__head">
+          <span class="sidebar__icon" data-icon="library"></span>
+          <h2 class="sidebar__title">Категории</h2>
+        </header>
+        <nav class="categories" id="categories"></nav>
+      </aside>
+
+      <main class="main scope" id="main">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Сменить тему">
+          <span class="theme-toggle__sun" data-icon="sun"></span>
+          <span class="theme-toggle__moon" data-icon="moon"></span>
+        </button>
+
+        <div class="main__scroll">
+          <section class="hero">
+            <div class="hero__cover" data-icon="music"></div>
+            <div class="hero__info">
+              <span class="hero__label">Плейлист</span>
+              <h1 class="hero__title" id="heroTitle">&nbsp;</h1>
+            </div>
+          </section>
+
+          <section class="playlist">
+            <div class="playlist__actions">
+              <button class="big-play" id="playlistPlay" type="button" aria-label="Воспроизвести плейлист">
+                <span class="big-play__play" data-icon="play"></span>
+                <span class="big-play__pause" data-icon="pause"></span>
+              </button>
+              <button class="icon-btn icon-btn--lg toggle" id="playlistShuffle" type="button"
+                      aria-label="Перемешать" aria-pressed="false" data-icon="shuffle"></button>
+            </div>
+
+            <div class="tracks-head" aria-hidden="true">
+              <span class="tracks-head__num">#</span>
+              <span>Название</span>
+              <span class="tracks-head__time" data-icon="clock"></span>
+            </div>
+            <ol class="tracks" id="tracks">
+              <li class="tracks__message">Загрузка треков…</li>
+            </ol>
+          </section>
+        </div>
+      </main>
+
+      <footer class="player scope" id="player">
+        <div class="now">
+          <div class="now__cover" data-icon="music"></div>
+          <div class="now__text">
+            <div class="now__title" id="nowTitle">Ничего не играет</div>
+            <div class="now__artist" id="nowArtist">Выберите трек</div>
+          </div>
+          <button class="icon-btn like" id="likeBtn" type="button" aria-label="Нравится" aria-pressed="false" disabled>
+            <span class="like__off" data-icon="heart"></span>
+            <span class="like__on" data-icon="heartFilled"></span>
+          </button>
+        </div>
+
+        <div class="controls">
+          <div class="controls__buttons">
+            <button class="icon-btn toggle" id="shuffleBtn" type="button" aria-label="Перемешать"
+                    aria-pressed="false" data-icon="shuffle"></button>
+            <button class="icon-btn" id="prevBtn" type="button" aria-label="Предыдущий трек" data-icon="prev"></button>
+            <button class="big-play big-play--player" id="playBtn" type="button" aria-label="Воспроизвести">
+              <span class="big-play__play" data-icon="play"></span>
+              <span class="big-play__pause" data-icon="pause"></span>
+            </button>
+            <button class="icon-btn" id="nextBtn" type="button" aria-label="Следующий трек" data-icon="next"></button>
+            <button class="icon-btn toggle repeat" id="repeatBtn" type="button" aria-label="Повторять трек"
+                    aria-pressed="false" data-icon="repeat"></button>
+          </div>
+          <div class="controls__progress">
+            <span class="time" id="currentTime">0:00</span>
+            <div class="progress" id="progress" role="slider" tabindex="0" aria-label="Перемотка"
+                 aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00">
+              <div class="progress__track"><div class="progress__fill" id="progressFill"></div></div>
+              <div class="progress__thumb" id="progressThumb"></div>
+            </div>
+            <span class="time" id="durationTime">0:00</span>
+          </div>
+        </div>
+
+        <div class="volume">
+          <button class="icon-btn" id="muteBtn" type="button" aria-label="Выключить звук">
+            <span class="volume__icon" id="volumeIcon" data-icon="volumeHigh"></span>
+          </button>
+          <input class="volume__range" id="volumeRange" type="range" min="0" max="100" value="70"
+                 aria-label="Громкость" />
+        </div>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
