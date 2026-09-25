@@ -1,4 +1,3 @@
-import './style.css';
 import { icons, mountIcons } from './icons.js';
 import { clamp, formatTime, pluralTracks, storage } from './utils.js';
 
@@ -68,7 +67,7 @@ const currentTrack = () => getTrack(state.trackId);
 const trackDuration = (t) => durations.get(t.id) ?? t.duration;
 
 async function loadTracks() {
-  const response = await fetch('tracks.json');
+  const response = await fetch('public/tracks.json');
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const data = await response.json();
   if (!Array.isArray(data)) throw new Error('tracks.json должен быть массивом');
@@ -534,7 +533,7 @@ async function init() {
     tracks = await loadTracks();
   } catch {
     el.tracks.innerHTML = `<li class="tracks__message tracks__message--error">
-      Не удалось загрузить tracks.json. Запустите проект через <code>npm run dev</code>.
+      Не удалось загрузить tracks.json. Откройте проект через Live Server (или другой локальный сервер).
     </li>`;
     return;
   }

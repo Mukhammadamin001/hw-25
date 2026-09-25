@@ -58,7 +58,7 @@ def track_list():
     for i, (cat, title, artist, fn) in enumerate(TRACKS, start=1):
         counters[cat] = counters.get(cat, 0) + 1
         out.append(dict(id=i, key=f'{cat}/{counters[cat]}', category=cat, title=title, artist=artist,
-                        fn=fn, file=f'music/{cat}/{counters[cat]}.mp3'))
+                        fn=fn, file=f'public/music/{cat}/{counters[cat]}.mp3'))
     return out
 
 

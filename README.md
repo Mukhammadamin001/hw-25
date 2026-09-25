@@ -6,15 +6,15 @@
 
 ## Запуск
 
-```bash
-npm install
-npm run dev       # http://localhost:5173
-npm run build     # production-сборка в dist/
-npm run preview   # посмотреть сборку
-```
+Проект — обычные HTML/CSS/JS без сборки. Нужен любой локальный сервер:
+
+- **VS Code:** правый клик по `index.html` → **Open with Live Server**;
+- **или в терминале:** `npx live-server` в папке проекта.
 
 > Открыть `index.html` двойным кликом не получится: `tracks.json` загружается через
-> `fetch`, а браузер запрещает его для `file://`. Нужен сервер — `npm run dev`.
+> `fetch`, а браузер запрещает это для страниц `file://`.
+
+Сайт работает и на GitHub Pages без изменений: все пути относительные.
 
 ## Структура
 
@@ -27,6 +27,7 @@ src/
   utils.js            formatTime(), склонение «трек/трека/треков», localStorage
 public/
   tracks.json         массив всех треков — список строится из него
+  favicon.svg
   music/
     jazz/1.mp3 … 6.mp3
     classic/1.mp3 … 8.mp3
@@ -44,7 +45,7 @@ scripts/              генератор музыки (см. ниже)
   "title": "Smoke & Saxophone",
   "artist": "The Quiet Trio",
   "category": "jazz",
-  "file": "music/jazz/3.mp3",
+  "file": "public/music/jazz/3.mp3",
   "duration": 135.66
 }
 ```
@@ -98,7 +99,8 @@ python3 -m venv .venv
 
 Положите mp3 в `public/music/<категория>/` (например `public/music/jazz/7.mp3`) и
 добавьте или поправьте запись в `public/tracks.json`: `title`, `artist`, `category`,
-`file`. Поле `duration` можно не указывать.
+`file` (путь от `index.html`, например `"public/music/jazz/7.mp3"`). Поле `duration`
+можно не указывать.
 
 ## Чек-лист
 
