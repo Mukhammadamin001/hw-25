@@ -3,15 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Задача 2</title>
+    <title>Задача 2 — Список постов пользователя</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="js/script.js" defer></script>
   </head>
   <body>
+    <header class="header">
+      <h1 class="header__title">Посты пользователя</h1>
+      <p class="header__subtitle">
+        Данные загружаются с
+        <a href="https://jsonplaceholder.typicode.com/posts" target="_blank" rel="noopener">jsonplaceholder.typicode.com</a>
+      </p>
+    </header>
+
     <main class="container">
-      <h1>Задача 2</h1>
-      <div id="app"></div>
+      <!-- Автор постов и выбор пользователя -->
+      <section class="author">
+        <div class="author__info" id="author"></div>
+        <label class="author__picker">
+          <span class="author__label">Пользователь</span>
+          <select class="author__select" id="userSelect" disabled>
+            <option>Загрузка…</option>
+          </select>
+        </label>
+      </section>
+
+      <p class="count" id="count" hidden></p>
+
+      <!-- Сообщение об ошибке: показываем, если запрос не удался -->
+      <div class="error" id="error" hidden>
+        <p class="error__text" id="errorText"></p>
+        <button class="error__btn" id="retryBtn" type="button">Попробовать снова</button>
+      </div>
+
+      <!-- Сюда script.js выводит посты -->
+      <section class="posts" id="posts" aria-live="polite" aria-busy="true"></section>
     </main>
   </body>
 </html>
