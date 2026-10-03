@@ -12,6 +12,13 @@ const CATEGORIES = [
 const audio = new Audio();
 audio.preload = 'metadata';
 
+// iOS не даёт менять громкость из JS (audio.volume всегда 1) — там ползунок прячем
+const canSetVolume = (() => {
+  const probe = new Audio();
+  probe.volume = 0.5;
+  return probe.volume === 0.5;
+})();
+
 let tracks = [];
 
 const state = {
@@ -20,17 +27,23 @@ const state = {
   isPlaying: false, // играет или на паузе
   volume: 0.7, // текущая громкость
   lastVolume: 0.7, // громкость до mute — к ней возвращаемся
-  shuffle: false,
-  repeat: false,
+  shuffle: storage.get('player:shuffle', false) === true,
+  repeat: storage.get('player:repeat', false) === true,
   liked: new Set(storage.get('player:liked', [])),
 };
 
 const durations = new Map(); // точные длительности, известные после loadedmetadata
 
+// Shuffle без повторов: трек не звучит снова, пока не сыграны все треки категории.
+// playedHistory — сыгранные треки, по ним «назад» в режиме shuffle возвращает к предыдущему
+const shuffled = new Set();
+const playedHistory = [];
+
 const $ = (id) => document.getElementById(id);
 const el = {
   root: document.documentElement,
   main: $('main'),
+  mainScroll: $('mainScroll'),
   player: $('player'),
   categories: $('categories'),
   heroTitle: $('heroTitle'),
@@ -54,6 +67,7 @@ const el = {
   volumeIcon: $('volumeIcon'),
   volumeRange: $('volumeRange'),
   themeToggle: $('themeToggle'),
+  themeColor: document.querySelector('meta[name="theme-color"]'),
   toast: $('toast'),
 };
 
@@ -117,20 +131,22 @@ function renderTracks() {
     return;
   }
   el.tracks.innerHTML = list.map((t, i) => `
-    <li class="track" data-id="${t.id}" tabindex="0" role="button"
-        aria-label="${escapeHtml(t.title)} — ${escapeHtml(t.artist)}">
-      <span class="track__index">
-        <span class="track__num">${i + 1}</span>
-        <span class="track__eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-        <span class="track__action track__action--play" aria-hidden="true">${icons.play}</span>
-        <span class="track__action track__action--pause" aria-hidden="true">${icons.pause}</span>
-      </span>
-      <span class="track__thumb" aria-hidden="true"></span>
-      <span class="track__info">
-        <span class="track__title">${escapeHtml(t.title)}</span>
-        <span class="track__artist">${escapeHtml(t.artist)}</span>
-      </span>
-      <span class="track__time">${trackDuration(t) ? formatTime(trackDuration(t)) : '—:—'}</span>
+    <li>
+      <button class="track" type="button" data-id="${t.id}"
+              aria-label="${escapeHtml(t.title)} — ${escapeHtml(t.artist)}">
+        <span class="track__index">
+          <span class="track__num">${i + 1}</span>
+          <span class="track__eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="track__action track__action--play" aria-hidden="true">${icons.play}</span>
+          <span class="track__action track__action--pause" aria-hidden="true">${icons.pause}</span>
+        </span>
+        <span class="track__thumb" aria-hidden="true"></span>
+        <span class="track__info">
+          <span class="track__title">${escapeHtml(t.title)}</span>
+          <span class="track__artist">${escapeHtml(t.artist)}</span>
+        </span>
+        <span class="track__time">${trackDuration(t) ? formatTime(trackDuration(t)) : '—:—'}</span>
+      </button>
     </li>`).join('');
   updateTracks();
 }
@@ -164,6 +180,10 @@ function updatePlayButtons() {
   }
   el.repeatBtn.classList.toggle('is-on', state.repeat);
   el.repeatBtn.setAttribute('aria-pressed', String(state.repeat));
+
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = track ? (state.isPlaying ? 'playing' : 'paused') : 'none';
+  }
 }
 
 function renderNowPlaying() {
@@ -196,8 +216,14 @@ function play() {
   if (promise) promise.catch(() => {});
 }
 
-function loadTrack(track) {
+function loadTrack(track, { back = false } = {}) {
+  if (!back && state.trackId !== null && state.trackId !== track.id) {
+    playedHistory.push(state.trackId);
+    if (playedHistory.length > 100) playedHistory.shift();
+  }
   state.trackId = track.id;
+  shuffled.add(track.id);
+  el.player.classList.remove('is-buffering');
   audio.src = track.file;
   const known = trackDuration(track);
   setProgress(0, known);
@@ -229,8 +255,20 @@ function togglePlay() {
 function playCategory(category) {
   const list = tracksOf(category);
   if (!list.length) return;
-  const track = state.shuffle ? list[Math.floor(Math.random() * list.length)] : list[0];
+  const track = state.shuffle ? pickShuffled(list, null) : list[0];
   playTrack(track.id);
+}
+
+// Случайный трек из ещё не сыгранных; когда сыграны все — начинаем новый круг
+function pickShuffled(list, currentId) {
+  const others = list.filter((t) => t.id !== currentId);
+  if (!others.length) return list[0];
+  let pool = others.filter((t) => !shuffled.has(t.id));
+  if (!pool.length) {
+    list.forEach((t) => shuffled.delete(t.id));
+    pool = others;
+  }
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 // Prev / Next — по кругу внутри категории ИГРАЮЩЕГО трека
@@ -241,15 +279,18 @@ function playNextTrack(step = 1) {
     return;
   }
   const list = tracksOf(track.category);
-  const index = list.findIndex((t) => t.id === track.id);
-  let nextIndex;
-  if (state.shuffle && step > 0 && list.length > 1) {
-    do nextIndex = Math.floor(Math.random() * list.length);
-    while (nextIndex === index);
+  let next;
+  let back = false;
+  if (state.shuffle && step > 0) {
+    next = pickShuffled(list, track.id);
+  } else if (state.shuffle && getTrack(playedHistory.at(-1))?.category === track.category) {
+    next = getTrack(playedHistory.pop());
+    back = true;
   } else {
-    nextIndex = (index + step + list.length) % list.length;
+    const index = list.findIndex((t) => t.id === track.id);
+    next = list[(index + step + list.length) % list.length];
   }
-  loadTrack(list[nextIndex]);
+  loadTrack(next, { back });
   play();
   updatePlayback();
 }
@@ -282,6 +323,7 @@ function seekTo(seconds) {
   if (!Number.isFinite(audio.duration)) return;
   audio.currentTime = clamp(seconds, 0, audio.duration);
   setProgress(audio.currentTime, audio.duration);
+  updatePositionState();
 }
 
 // ---------------------------------------------------------------------------
@@ -291,6 +333,7 @@ function setVolume(value) {
   state.volume = clamp(value, 0, 1);
   if (state.volume > 0) state.lastVolume = state.volume;
   audio.volume = state.volume;
+  audio.muted = state.volume === 0; // muted работает и там, где volume менять нельзя (iOS)
 
   const percent = Math.round(state.volume * 100);
   el.volumeRange.value = String(percent);
@@ -311,9 +354,15 @@ function toggleMute() {
 // ---------------------------------------------------------------------------
 // Прочее: тема, «нравится», media session, уведомления
 // ---------------------------------------------------------------------------
+function applyTheme(theme) {
+  el.root.dataset.theme = theme;
+  el.themeColor.content = theme === 'light' ? '#e7e6eb' : '#000000';
+  el.themeToggle.setAttribute('aria-label', theme === 'light' ? 'Включить тёмную тему' : 'Включить светлую тему');
+}
+
 function toggleTheme() {
   const next = el.root.dataset.theme === 'light' ? 'dark' : 'light';
-  el.root.dataset.theme = next;
+  applyTheme(next);
   storage.set('player:theme', next);
 }
 
@@ -335,14 +384,31 @@ function updateMediaSession(track) {
   });
 }
 
+// Полоса прогресса на экране блокировки и в системном мини-плеере
+function updatePositionState() {
+  if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+  if (!Number.isFinite(audio.duration)) return;
+  try {
+    navigator.mediaSession.setPositionState({
+      duration: audio.duration,
+      playbackRate: audio.playbackRate,
+      position: clamp(audio.currentTime, 0, audio.duration),
+    });
+  } catch {
+    /* некорректное состояние — пропускаем */
+  }
+}
+
 function setupMediaSession() {
   if (!('mediaSession' in navigator)) return;
   const handlers = {
-    play: () => play(),
+    play: () => (state.trackId === null ? playCategory(state.category) : play()),
     pause: () => audio.pause(),
     previoustrack: () => playPrevTrack(),
     nexttrack: () => playNextTrack(),
     seekto: (details) => seekTo(details.seekTime),
+    seekbackward: (details) => seekTo(audio.currentTime - (details.seekOffset || 10)),
+    seekforward: (details) => seekTo(audio.currentTime + (details.seekOffset || 10)),
   };
   for (const [action, handler] of Object.entries(handlers)) {
     try {
@@ -377,7 +443,16 @@ audio.addEventListener('play', () => {
 
 audio.addEventListener('pause', () => {
   state.isPlaying = false;
+  el.player.classList.remove('is-buffering');
   updatePlayback();
+  updatePositionState();
+});
+
+// Данных не хватает (медленная сеть) — крутим индикатор вокруг кнопки play
+audio.addEventListener('waiting', () => el.player.classList.add('is-buffering'));
+audio.addEventListener('playing', () => {
+  el.player.classList.remove('is-buffering');
+  updatePositionState();
 });
 
 // Файл загрузился — известна точная длительность
@@ -386,6 +461,7 @@ audio.addEventListener('loadedmetadata', () => {
   if (!track) return;
   durations.set(track.id, audio.duration);
   setProgress(audio.currentTime, audio.duration);
+  updatePositionState();
   const row = el.tracks.querySelector(`.track[data-id="${track.id}"] .track__time`);
   if (row) row.textContent = formatTime(audio.duration);
 });
@@ -409,6 +485,7 @@ audio.addEventListener('error', () => {
   const track = currentTrack();
   if (!track || !audio.getAttribute('src')) return;
   state.isPlaying = false;
+  el.player.classList.remove('is-buffering');
   updatePlayback();
   showToast(`Не удалось загрузить «${track.title}»`);
 });
@@ -425,18 +502,12 @@ el.categories.addEventListener('click', (event) => {
   renderHero();
   renderTracks();
   updatePlayback();
+  el.mainScroll.scrollTop = 0;
 });
 
 el.tracks.addEventListener('click', (event) => {
   const row = event.target.closest('.track');
   if (row) playTrack(Number(row.dataset.id));
-});
-
-el.tracks.addEventListener('keydown', (event) => {
-  const row = event.target.closest('.track');
-  if (!row || (event.key !== 'Enter' && event.key !== ' ')) return;
-  event.preventDefault();
-  playTrack(Number(row.dataset.id));
 });
 
 el.playlistPlay.addEventListener('click', () => {
@@ -446,6 +517,9 @@ el.playlistPlay.addEventListener('click', () => {
 
 const toggleShuffle = () => {
   state.shuffle = !state.shuffle;
+  shuffled.clear();
+  if (state.trackId !== null) shuffled.add(state.trackId);
+  storage.set('player:shuffle', state.shuffle);
   updatePlayButtons();
 };
 el.playlistShuffle.addEventListener('click', toggleShuffle);
@@ -453,6 +527,7 @@ el.shuffleBtn.addEventListener('click', toggleShuffle);
 
 el.repeatBtn.addEventListener('click', () => {
   state.repeat = !state.repeat;
+  storage.set('player:repeat', state.repeat);
   updatePlayButtons();
 });
 
@@ -503,7 +578,7 @@ el.muteBtn.addEventListener('click', toggleMute);
 // Пробел — play/pause, если фокус не на кнопке или поле ввода
 document.addEventListener('keydown', (event) => {
   if (event.code !== 'Space' || event.repeat) return;
-  if (event.target.closest('button, input, textarea, select, [role="slider"], .track')) return;
+  if (event.target.closest('button, input, textarea, select, [role="slider"]')) return;
   event.preventDefault();
   togglePlay();
 });
@@ -513,6 +588,8 @@ document.addEventListener('keydown', (event) => {
 // ---------------------------------------------------------------------------
 async function init() {
   mountIcons();
+  applyTheme(el.root.dataset.theme === 'light' ? 'light' : 'dark');
+  el.root.classList.toggle('no-volume', !canSetVolume);
 
   const savedVolume = storage.get('player:volume');
   if (savedVolume && typeof savedVolume.volume === 'number') {

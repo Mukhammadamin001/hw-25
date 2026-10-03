@@ -2,8 +2,12 @@
 <html lang="ru" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Музыкальный плеер: Jazz, Classic, Blues" />
+    <meta name="theme-color" content="#000000" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Музыкальный плеер" />
+    <meta property="og:description" content="21 оригинальный трек в трёх плейлистах: Jazz, Classic, Blues" />
     <title>Музыкальный плеер</title>
     <link rel="icon" type="image/svg+xml" href="public/favicon.svg" />
     <link rel="stylesheet" href="src/style.css" />
@@ -16,6 +20,7 @@
           theme = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
         }
         document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#e7e6eb' : '#000000';
       })();
     </script>
   </head>
@@ -30,13 +35,12 @@
       </aside>
 
       <main class="main scope" id="main">
-        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Сменить тему">
-          <span class="theme-toggle__sun" data-icon="sun"></span>
-          <span class="theme-toggle__moon" data-icon="moon"></span>
-        </button>
-
-        <div class="main__scroll">
+        <div class="main__scroll" id="mainScroll">
           <section class="hero">
+            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Сменить тему">
+              <span class="theme-toggle__sun" data-icon="sun"></span>
+              <span class="theme-toggle__moon" data-icon="moon"></span>
+            </button>
             <div class="hero__cover" data-icon="music"></div>
             <div class="hero__info">
               <span class="hero__label">Плейлист</span>

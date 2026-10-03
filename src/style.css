@@ -16,6 +16,7 @@
   --rail: #4c4c4c;
   --volume-fill: #fff;
   --knob: #fff;
+  --knob-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   --cover-shadow: 0 10px 34px rgba(0, 0, 0, 0.55);
   --scroll: #3a3a3a;
 }
@@ -34,6 +35,7 @@
   --rail: #cecfd4;
   --volume-fill: #121212;
   --knob: #fff;
+  --knob-shadow: 0 0 0 1px rgba(18, 18, 18, 0.14), 0 1px 4px rgba(18, 18, 18, 0.3);
   --cover-shadow: 0 12px 30px rgba(35, 20, 80, 0.25);
   --scroll: #cfcfd6;
 }
@@ -83,6 +85,8 @@ button {
   border: 0;
   padding: 0;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button:disabled {
@@ -121,7 +125,7 @@ h2 {
   grid-template-columns: 332px minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) auto;
   gap: 8px;
-  padding: 4px 8px 0 6px;
+  padding: 4px max(8px, env(safe-area-inset-right)) 0 max(6px, env(safe-area-inset-left));
 }
 
 .sidebar,
@@ -181,10 +185,6 @@ h2 {
   transition: background-color 0.15s;
 }
 
-.category:hover {
-  background: var(--hover);
-}
-
 .category.is-active {
   background: var(--cat-active);
 }
@@ -224,6 +224,9 @@ h2 {
 .category__meta {
   font-size: 14px;
   color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .category__speaker {
@@ -268,10 +271,6 @@ h2 {
   transition: transform 0.2s, background-color 0.25s;
 }
 
-.theme-toggle:hover {
-  transform: scale(1.06);
-}
-
 .theme-toggle span {
   width: 22px;
   height: 22px;
@@ -284,6 +283,7 @@ h2 {
 }
 
 .hero {
+  position: relative;
   display: flex;
   align-items: flex-end;
   gap: 27px;
@@ -349,11 +349,6 @@ h2 {
   transition: transform 0.15s, filter 0.15s, background-color 0.3s;
 }
 
-.big-play:hover {
-  transform: scale(1.05);
-  filter: brightness(1.08);
-}
-
 .big-play:active {
   transform: scale(0.97);
 }
@@ -377,6 +372,25 @@ h2 {
   display: block;
 }
 
+/* Трек грузится — кольцо вокруг кнопки (появляется с задержкой, чтобы не мигать) */
+.is-buffering .big-play--player::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-text);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite, appear 0.2s 0.3s both;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes appear {
+  from { opacity: 0; }
+}
+
 .icon-btn {
   position: relative;
   width: 36px;
@@ -394,11 +408,6 @@ h2 {
 .icon-btn > span {
   width: 20px;
   height: 20px;
-}
-
-.icon-btn:not(:disabled):hover {
-  opacity: 1;
-  transform: scale(1.08);
 }
 
 .icon-btn--lg {
@@ -510,16 +519,14 @@ h2 {
 
 .track {
   position: relative;
+  width: 100%;
   height: 62px;
   padding: 0 18px 0 14px;
+  text-align: left;
   border-radius: 6px;
   cursor: pointer;
   user-select: none;
   transition: background-color 0.12s;
-}
-
-.track:hover {
-  background: var(--hover);
 }
 
 .track.is-active {
@@ -596,30 +603,13 @@ h2 {
   animation-play-state: running;
 }
 
-/* Состояния колонки «#»: номер / эквалайзер / play / pause */
-.track.is-active .track__num,
-.track:hover .track__num {
+/* Состояния колонки «#»: номер / эквалайзер / play / pause (последние два — при наведении) */
+.track.is-active .track__num {
   display: none;
 }
 
 .track.is-active .track__eq {
   display: flex;
-}
-
-.track:hover .track__eq {
-  display: none;
-}
-
-.track:hover .track__action--play {
-  display: block;
-}
-
-.track.is-playing:hover .track__action--play {
-  display: none;
-}
-
-.track.is-playing:hover .track__action--pause {
-  display: block;
 }
 
 .track__thumb {
@@ -678,7 +668,7 @@ h2 {
   align-items: center;
   gap: 24px;
   min-height: 120px;
-  padding: 10px 20px 10px 17px;
+  padding: 10px 20px max(10px, env(safe-area-inset-bottom)) 17px;
 }
 
 .now {
@@ -812,12 +802,11 @@ h2 {
   margin: -7px 0 0 -7px;
   border-radius: 50%;
   background: var(--knob);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--knob-shadow);
   pointer-events: none;
   transition: transform 0.12s;
 }
 
-.progress:hover .progress__thumb,
 .progress.is-dragging .progress__thumb {
   transform: scale(1.15);
 }
@@ -832,6 +821,10 @@ h2 {
 .volume .icon-btn > span {
   width: 22px;
   height: 22px;
+}
+
+.no-volume .volume__range {
+  display: none;
 }
 
 .volume__range {
@@ -859,7 +852,7 @@ h2 {
   margin-top: -5px;
   border-radius: 50%;
   background: var(--knob);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--knob-shadow);
 }
 
 .volume__range::-moz-range-track {
@@ -880,7 +873,56 @@ h2 {
   border: 0;
   border-radius: 50%;
   background: var(--knob);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--knob-shadow);
+}
+
+/* ==========================================================================
+   Наведение — только для мыши, чтобы на тач-экранах не «залипало» после тапа
+   ========================================================================== */
+@media (hover: hover) {
+  .category:hover,
+  .track:hover {
+    background: var(--hover);
+  }
+
+  .theme-toggle:hover {
+    transform: scale(1.06);
+  }
+
+  .big-play:hover {
+    transform: scale(1.05);
+    filter: brightness(1.08);
+  }
+
+  .big-play:active {
+    transform: scale(0.97);
+  }
+
+  .icon-btn:not(:disabled):hover {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  .progress:hover .progress__thumb {
+    transform: scale(1.15);
+  }
+
+  .track:hover .track__num,
+  .track:hover .track__eq {
+    display: none;
+  }
+
+  .track:hover .track__action--play {
+    display: block;
+  }
+
+  .track.is-playing:hover .track__action--play {
+    display: none;
+  }
+
+  .track.is-playing:hover .track__action--pause {
+    display: block;
+  }
 }
 
 /* ==========================================================================
@@ -914,11 +956,30 @@ h2 {
    ========================================================================== */
 @media (max-width: 1100px) {
   .app {
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns: 280px minmax(0, 1fr);
   }
 
+  .category {
+    gap: 12px;
+  }
+
+  .category__cover {
+    width: 48px;
+    height: 48px;
+    padding: 13px;
+  }
+
+  .category__speaker {
+    margin-right: 2px;
+  }
+
+  /* fr вместо фиксированного максимума — иначе центр съедает место под название трека */
   .player {
-    grid-template-columns: minmax(0, 1fr) minmax(300px, 520px) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 1.2fr) auto;
+  }
+
+  .like {
+    margin-left: 6px;
   }
 
   .volume__range {
@@ -930,7 +991,7 @@ h2 {
   .app {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr) auto;
-    padding: 8px 8px 0;
+    padding: 8px max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left));
   }
 
   .sidebar {
@@ -1003,7 +1064,7 @@ h2 {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas: 'now volume' 'controls controls';
     gap: 10px 16px;
-    padding: 12px 12px 14px;
+    padding: 12px 12px max(14px, env(safe-area-inset-bottom));
   }
 
   .now {
@@ -1054,23 +1115,102 @@ h2 {
     grid-column: 2;
   }
 
+  .hero {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .hero__cover {
     width: 96px;
     height: 96px;
     padding: 26px;
   }
 
+  .hero__title {
+    font-size: clamp(32px, 11vw, 48px);
+  }
+
+  /* Три категории должны помещаться в строку даже на 320px */
+  .sidebar {
+    padding: 8px 6px;
+  }
+
+  .categories {
+    gap: 4px;
+  }
+
+  .category {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 5px;
+    gap: 8px;
+  }
+
+  .category__cover {
+    width: 34px;
+    height: 34px;
+    padding: 9px;
+  }
+
+  .category__text {
+    flex: 0 1 auto;
+  }
+
+  .category__name {
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .category__meta {
     display: none;
   }
 
+  /* На телефоне громкость регулируют кнопками устройства — оставляем только mute,
+     а место отдаём названию трека */
   .volume__range {
-    width: 72px;
+    display: none;
   }
 
   .big-play--player {
     width: 54px;
     height: 54px;
+  }
+}
+
+/* Низкий экран (телефон в альбомной ориентации) — компактная шапка плейлиста */
+@media (max-height: 560px) and (min-width: 521px) {
+  .hero {
+    padding-top: 20px;
+    padding-bottom: 16px;
+    padding-right: 84px;
+  }
+
+  .hero__cover {
+    width: 88px;
+    height: 88px;
+    padding: 24px;
+  }
+
+  .hero__title {
+    font-size: 44px;
+  }
+
+  .theme-toggle {
+    top: 20px;
+  }
+
+  .playlist {
+    padding-top: 14px;
+  }
+
+  .playlist__actions {
+    padding-bottom: 12px;
+  }
+
+  .player {
+    min-height: 0;
   }
 }
 
