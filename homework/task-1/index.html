@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Задача 1 — Список пользователей</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/script.js" defer></script>
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="header__title">Пользователи</h1>
+      <p class="header__subtitle">
+        Данные загружаются с
+        <a href="https://jsonplaceholder.typicode.com/users" target="_blank" rel="noopener">jsonplaceholder.typicode.com</a>
+      </p>
+      <p class="header__count" id="count" hidden></p>
+    </header>
+
+    <main class="container">
+      <!-- Сообщение об ошибке: показываем, если запрос не удался -->
+      <div class="error" id="error" hidden>
+        <p class="error__text">Не удалось загрузить пользователей.</p>
+        <button class="error__btn" id="retryBtn" type="button">Попробовать снова</button>
+      </div>
+
+      <!-- Сюда script.js выводит карточки -->
+      <section class="users" id="users" aria-live="polite" aria-busy="true"></section>
+    </main>
+  </body>
+</html>

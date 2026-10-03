@@ -1,0 +1,269 @@
+/* ==========================================================================
+   Цвета (светлая тема и тёмная — по настройке системы)
+   ========================================================================== */
+:root {
+  color-scheme: light dark;
+  --bg: #f4f5f9;
+  --card: #fff;
+  --text: #1c1f2a;
+  --muted: #6b7185;
+  --line: #e6e8ef;
+  --accent: #4f5bd5;
+  --skeleton: #e9ebf2;
+  --shadow: 0 2px 6px rgba(28, 31, 42, 0.06);
+  --shadow-hover: 0 12px 28px rgba(28, 31, 42, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12141b;
+    --card: #1c1f2a;
+    --text: #eef0f6;
+    --muted: #9aa0b4;
+    --line: #2b2f3d;
+    --accent: #8b93ff;
+    --skeleton: #262a37;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ==========================================================================
+   Основа
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* display у элементов не должен перебивать атрибут hidden */
+[hidden] {
+  display: none !important;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px 48px;
+}
+
+/* ==========================================================================
+   Шапка
+   ========================================================================== */
+.header {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 16px 24px;
+}
+
+.header__title {
+  margin: 0;
+  font-size: 32px;
+}
+
+.header__subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.header__count {
+  display: inline-block;
+  margin: 12px 0 0;
+  padding: 2px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius: 999px;
+}
+
+/* ==========================================================================
+   Сетка карточек
+   ========================================================================== */
+.users {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.card__avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, hsl(var(--hue) 70% 58%), hsl(calc(var(--hue) + 40) 70% 45%));
+  border-radius: 50%;
+}
+
+.card__name {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.card__username {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Подпись слева, значение справа */
+.card__info {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.card__info dt {
+  color: var(--muted);
+}
+
+.card__info dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Компания прижата к низу карточки, даже если текста выше меньше */
+.card__company {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.card__company-name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.card__company-phrase {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* ==========================================================================
+   Загрузка и ошибка
+   ========================================================================== */
+.card--skeleton {
+  min-height: 300px;
+  background: linear-gradient(90deg, var(--skeleton) 25%, var(--card) 50%, var(--skeleton) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite linear;
+}
+
+.card--skeleton:hover {
+  transform: none;
+  box-shadow: var(--shadow);
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.error {
+  padding: 24px;
+  text-align: center;
+  background: var(--card);
+  border: 1px solid #e5484d;
+  border-radius: 16px;
+}
+
+.error__text {
+  margin: 0 0 12px;
+  color: #e5484d;
+  font-weight: 600;
+}
+
+.error__btn {
+  padding: 10px 20px;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.error__btn:hover {
+  filter: brightness(1.1);
+}
+
+/* ==========================================================================
+   Адаптив
+   ========================================================================== */
+@media (max-width: 480px) {
+  .header {
+    padding-top: 24px;
+  }
+
+  .header__title {
+    font-size: 26px;
+  }
+
+  .users {
+    gap: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card--skeleton {
+    transition: none;
+    animation: none;
+  }
+}
